@@ -244,16 +244,19 @@ class IntervalGame:
         return note_name
 
     def _play_interval(self, descending=False):
-        if not self._has_midi:
-            self._play_interval_sine(descending)
-            return 
-
         note1 = 48 + self._offset1
         note2 = note1 + self._half_steps
 
         if descending:
             note1, note2 = note2, note1
 
+        if self._has_midi:
+            self._play_notes_midi(note1, note2)
+
+        else:
+            self._play_notes_sine(note1, note2)
+
+    def _play_notes_midi(self, note1, note2):
         self._midi_out.write([
             [[0x90, note1, 127], pygame.midi.time()], 
             [[0x80, note1, 0], pygame.midi.time() + NOTE_DURATION_MS],
@@ -261,18 +264,15 @@ class IntervalGame:
             [[0x80, note2, 0], pygame.midi.time() + 2 * NOTE_DURATION_MS]
             ])
 
-    def _play_interval_sine(self, descending=False):
+    def _play_notes_sine(self, note1, note2):
         sample_rate = pygame.mixer.get_init()[0]
         t = np.arange(sample_rate * NOTE_DURATION_MS * 0.001) / sample_rate
 
-        freq1 = self._offset_to_freq(self._offset1)
-        freq2 = self._offset_to_freq(self._offset1 + self._half_steps)
+        freq1 = pygame.midi.midi_to_frequency(note1)
+        freq2 = pygame.midi.midi_to_frequency(note2) 
 
         sine1 = 0.2 * np.sin(2 * np.pi * freq1 * t)        
         sine2 = 0.2 * np.sin(2 * np.pi * freq2 * t)
-
-        if descending:
-            sine1, sine2 = sine2, sine1
 
         buffer = np.concat((sine1, sine2)).astype(np.float32)
         
@@ -281,11 +281,6 @@ class IntervalGame:
 
         self._sound = pygame.mixer.Sound(buffer)
         self._sound.play()
-
-    def _offset_to_freq(self, offset):
-        midi_note = 60 + offset
-        return pygame.midi.midi_to_frequency(midi_note)
-
 
 
 def is_note_valid(note_name):
