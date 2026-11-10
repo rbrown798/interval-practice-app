@@ -29,6 +29,11 @@ INTERVAL_NAMES = ['minor 2nd', 'major 2nd', 'minor 3rd', 'major 3rd',
                   'perfect 4th', 'tritone', 'perfect 5th', 'minor 6th', 
                   'major 6th', 'minor 7th', 'major 7th']
 
+ACCIDENTAL_KEY_OFFSETS = {pygame.K_UP: 1,
+                          pygame.K_DOWN: -1,
+                          pygame.K_RIGHT: 2,
+                          pygame.K_LEFT: -2}
+
 NOTE_DURATION_MS = 500
 
 
@@ -140,17 +145,9 @@ class IntervalGame:
 
             pressed_keys = pygame.key.get_pressed()
 
-            if pressed_keys[pygame.K_UP]:
-                note_offset = (note_offset + 1) % 12
-
-            elif pressed_keys[pygame.K_DOWN]:
-                note_offset = (note_offset - 1) % 12 
-                
-            elif pressed_keys[pygame.K_RIGHT]:
-                note_offset = (note_offset + 2) % 12 
-    
-            elif pressed_keys[pygame.K_LEFT]:
-                note_offset = (note_offset - 2) % 12 
+            for key, accidental_offset in ACCIDENTAL_KEY_OFFSETS.items():
+                if pressed_keys[key]:
+                    note_offset = (note_offset + accidental_offset) % 12
 
             if note_offset == self._offset2: 
                 self._next_question()
