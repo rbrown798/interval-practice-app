@@ -122,22 +122,25 @@ class IntervalGame:
                 self._running = False
 
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    self._running = False
+                self._handle_keydown(event.key)
 
-                elif event.key == pygame.K_k:
-                    self._keyboard_visible = not self._keyboard_visible
+    def _handle_keydown(self, key):
+        if key == pygame.K_q:
+            self._running = False
 
-                elif event.key in (pygame.K_EQUALS, pygame.K_PLUS):
-                    self._play_interval()
+        elif key == pygame.K_k:
+            self._keyboard_visible = not self._keyboard_visible
 
-                elif event.key == pygame.K_MINUS:
-                    self._play_interval(descending=True)
+        elif key in (pygame.K_EQUALS, pygame.K_PLUS):
+            self._play_interval()
 
-                else:
-                    self._handle_key(event.key)
+        elif key == pygame.K_MINUS:
+            self._play_interval(descending=True)
 
-    def _handle_key(self, key):
+        else:
+            self._handle_note_key(key)
+
+    def _handle_note_key(self, key):
         key_name = pygame.key.name(key).upper()
 
         if key_name in NOTE_TO_OFFSET:
