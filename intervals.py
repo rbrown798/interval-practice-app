@@ -45,7 +45,7 @@ class IntervalGame:
         self._half_steps = 0
         self._offset1 = 0
         self._offset2 = 0
-        self._interval = ''
+        self._interval_name = ''
         self._note1_name = ''
 
         self._question_text = ''
@@ -156,7 +156,7 @@ class IntervalGame:
                 self._next_question()
 
     def _update(self):
-        self._question_text = f'What is a {self._interval} above {self._note1_name}?\n'
+        self._question_text = f'What is a {self._interval_name} above {self._note1_name}?\n'
         self._note2_text = ''
         self._accidental_text = ''
 
@@ -222,7 +222,7 @@ class IntervalGame:
         self._offset1 = offset1
         
         self._offset2 = (offset1 + half_steps) % 12
-        self._interval = INTERVAL_NAMES[half_steps - 1]
+        self._interval_name = INTERVAL_NAMES[half_steps - 1]
 
         if not self._has_note1:
             self._note1_name = self._get_note_name(offset1)
