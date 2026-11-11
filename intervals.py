@@ -38,8 +38,8 @@ NOTE_DURATION_MS = 500
 
 
 class IntervalGame:
-    def __init__(self, note1_name=None):
-        self._has_note1 = False
+    def __init__(self, reference_notes=[]):
+        self._reference_notes = reference_notes
         self._has_midi = False
         self._running = False
         self._half_steps = 0
@@ -61,11 +61,6 @@ class IntervalGame:
 
         self._keyboard_visible = False
         self._sound_on = True
-
-        if note1_name is not None:
-            self._has_note1 = True
-            self._note1_name = note1_name
-            self._offset1 = self._get_offset(note1_name)
 
     def _get_offset(self, note_name):
         if note_name.endswith('b'):
@@ -211,20 +206,28 @@ class IntervalGame:
     def _next_question(self):
         half_steps = self._half_steps
         offset1 = self._offset1
+        note1_name = self._note1_name
 
         while (offset1 == self._offset1) and (half_steps == self._half_steps):
             half_steps = random.randint(1, 11)
         
-            if not self._has_note1:
+            if self._reference_notes:
+                note1_name = random.choice(self._reference_notes)
+                offset1 = NOTE_TO_OFFSET[note1_name]
+
+            else:
                 offset1 = random.randint(0, 11)
-        
+
         self._half_steps = half_steps
         self._offset1 = offset1
         
         self._offset2 = (offset1 + half_steps) % 12
         self._interval_name = INTERVAL_NAMES[half_steps - 1]
 
-        if not self._has_note1:
+        if self._reference_notes:
+            self._note1_name = note1_name
+
+        else:
             self._note1_name = self._get_note_name(offset1)
 
         if self._sound_on:
@@ -298,12 +301,20 @@ def is_note_valid(note_name):
     return False
 
 
+def are_notes_valid(note_names):
+    for note in note_names:
+        if is_note_valid(note) == False:
+            return False
+
+    return True
+
+
 parser = argparse.ArgumentParser()
-parser.add_argument('note', nargs='?')
+parser.add_argument('notes', nargs='*')
 args = parser.parse_args()
 
-if is_note_valid(args.note):
-    game = IntervalGame(args.note)
+if are_notes_valid(args.notes):
+    game = IntervalGame(args.notes)
     game.run()
 
 else:
