@@ -47,6 +47,7 @@ class IntervalGame:
         self._offset2 = 0
         self._interval_name = ''
         self._note1_name = ''
+        self._direction = 1
 
         self._question_text = ''
         self._note2_text = ''
@@ -151,7 +152,13 @@ class IntervalGame:
                 self._next_question()
 
     def _update(self):
-        self._question_text = f'What is a {self._interval_name} above {self._note1_name}?\n'
+        if self._direction == 1:
+            direction_name = 'above'
+        else:
+            direction_name = 'below'
+
+        self._question_text = f'What is a {self._interval_name} ' + \
+                                f'{direction_name} {self._note1_name}?\n'
         self._note2_text = ''
         self._accidental_text = ''
 
@@ -207,8 +214,13 @@ class IntervalGame:
         half_steps = self._half_steps
         offset1 = self._offset1
         note1_name = self._note1_name
+        direction = self._direction
 
-        while (offset1 == self._offset1) and (half_steps == self._half_steps):
+        while (offset1 == self._offset1) and (half_steps == self._half_steps) \
+                and direction == self._direction:
+
+            direction = random.choice([1, -1])
+
             half_steps = random.randint(1, 11)
         
             if self._reference_notes:
@@ -220,8 +232,9 @@ class IntervalGame:
 
         self._half_steps = half_steps
         self._offset1 = offset1
+        self._direction = direction
         
-        self._offset2 = (offset1 + half_steps) % 12
+        self._offset2 = (offset1 + direction * half_steps) % 12
         self._interval_name = INTERVAL_NAMES[half_steps - 1]
 
         if self._reference_notes:
@@ -248,7 +261,7 @@ class IntervalGame:
 
     def _play_interval(self, descending=False):
         note1 = 48 + self._offset1
-        note2 = note1 + self._half_steps
+        note2 = note1 + self._direction * self._half_steps
 
         if descending:
             note1, note2 = note2, note1
