@@ -158,7 +158,7 @@ class IntervalGame:
             direction_name = 'below'
 
         self._question_text = f'What is a {self._interval_name} ' + \
-                                f'{direction_name} {self._note1_name}?\n'
+                                f'{direction_name} {self._note1_name}?'
         self._note2_text = ''
         self._accidental_text = ''
 
