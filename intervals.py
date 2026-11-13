@@ -34,6 +34,11 @@ ACCIDENTAL_KEY_OFFSETS = {pygame.K_UP: 1,
                           pygame.K_RIGHT: 2,
                           pygame.K_LEFT: -2}
 
+ARROW_KEYS = list(ACCIDENTAL_KEY_OFFSETS.keys())
+
+NOTE_KEYS = [pygame.K_a, pygame.K_b, pygame.K_c, pygame.K_d, pygame.K_e, 
+             pygame.K_f, pygame.K_g]
+
 NOTE_DURATION_MS = 500
 
 
@@ -133,23 +138,39 @@ class IntervalGame:
         elif key == pygame.K_MINUS:
             self._play_interval(descending=True)
 
-        else:
+        elif key in ARROW_KEYS:
+            self._handle_arrow_key(key)
+
+        elif key in NOTE_KEYS:
             self._handle_note_key(key)
 
     def _handle_note_key(self, key):
         key_name = pygame.key.name(key).upper()
+        note_offset = NOTE_TO_OFFSET[key_name]
 
-        if key_name in NOTE_TO_OFFSET:
-            note_offset = NOTE_TO_OFFSET[key_name]
+        # look for pressed arrow key 
+        pressed_keys = pygame.key.get_pressed()
+        for key, accidental_offset in ACCIDENTAL_KEY_OFFSETS.items():
+            if pressed_keys[key]:
+                note_offset = (note_offset + accidental_offset) % 12
 
-            pressed_keys = pygame.key.get_pressed()
+        if note_offset == self._offset2: 
+            self._next_question()
 
-            for key, accidental_offset in ACCIDENTAL_KEY_OFFSETS.items():
-                if pressed_keys[key]:
-                    note_offset = (note_offset + accidental_offset) % 12
+    def _handle_arrow_key(self, key):
+        accidental_offset = ACCIDENTAL_KEY_OFFSETS[key]
+        note_offset = 0
 
-            if note_offset == self._offset2: 
-                self._next_question()
+        # look for pressed note key
+        pressed_keys = pygame.key.get_pressed()
+        for key in NOTE_KEYS:
+            if pressed_keys[key]:
+                key_name = pygame.key.name(key).upper()
+                note_offset = NOTE_TO_OFFSET[key_name]
+                note_offset = (note_offset + accidental_offset) % 12
+
+        if note_offset == self._offset2:
+            self._next_question()
 
     def _update(self):
         if self._direction == 1:
